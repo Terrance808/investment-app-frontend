@@ -36,6 +36,9 @@ function Dashboard() {
 
                 <div class="w-1/5 border-2">
                     <input type="text" name="Search Bar" />
+                    <div class="flex justify-center">
+                        <h3 class="text-lg">Portfolio</h3>
+                    </div>
 
 
                 </div>
