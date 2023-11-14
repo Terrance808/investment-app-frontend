@@ -37,7 +37,7 @@ function Login() {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        const db = getFirestore();
+        const db = getFirestore(app);
         try {
             const userCredential = await signInWithEmailAndPassword(auth, loginEmail, loginPassword);
             const user = userCredential.user;
