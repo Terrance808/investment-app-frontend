@@ -31,10 +31,18 @@ const auth = getAuth(app);
 function SignUp() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
 
     const navigate = useNavigate();
 
-    const handleEmailSignUp = async () => {
+    const handleEmailSignUp = async (e) => {
+        e.preventDefault();
+
+        if (password !== confirmPassword) {
+            alert('Passwords do not match!');
+            return;
+        }
+
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             console.log('User signed up:', userCredential.user.uid);
@@ -70,21 +78,34 @@ function SignUp() {
 
 
     return (
-        <div>
-            <input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-            />
-            <input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-            />
-            <button onClick={handleEmailSignUp}>Sign Up with Email</button>
-            <button onClick={handleGoogleSignUp}>Sign Up with Google</button>
+        <div className="flex flex-col justify-center items-center h-screen">
+            <h1>Sign Up</h1>
+            <form onSubmit={handleEmailSignUp} className="border border-gray-300 p-5 rounded shadow-md w-75 mt-4">
+                <input
+                    type="email"
+                    placeholder="Email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full p-2.5 my-2.5 border border-gray-300 rounded"
+                />
+                <input
+                    type="password"
+                    placeholder="Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full p-2.5 my-2.5 border border-gray-300 rounded"
+                />
+                <input
+                    type="password"
+                    placeholder="Confirm Password"
+                    className="w-full p-2.5 my-2.5 border border-gray-300 rounded"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                />
+                <button type="submit" className="w-full py-2.5 bg-blue-600 text-white rounded cursor-pointer hover:bg-blue-700 mb-4">Sign Up with Email</button>
+                <button onClick={handleGoogleSignUp} className="w-full py-2.5 bg-blue-600 text-white rounded cursor-pointer hover:bg-blue-700">Sign Up with Google</button>
+            </form>
+            
         </div>
     );
 }

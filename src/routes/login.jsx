@@ -85,8 +85,9 @@ function Login() {
     };
 
     return (
-        <div className="login-container">
-            <form onSubmit={handleSubmit}>
+        <div className="flex flex-col justify-center items-center h-screen">
+            <h1>Sign In</h1>
+            <form onSubmit={handleSubmit} className="border border-gray-300 p-5 rounded shadow-md w-75 mt-4">
                 <label htmlFor="email">Email:</label>
                 <input
                     type="email"
@@ -94,6 +95,7 @@ function Login() {
                     name="email"
                     value={loginEmail}
                     onChange={(e) => setLoginEmail(e.target.value)}
+                    className="w-full p-2.5 my-2.5 border border-gray-300 rounded"
                     required
                 />
                 <label htmlFor="password">Password:</label>
@@ -103,11 +105,13 @@ function Login() {
                     name="password"
                     value={loginPassword}
                     onChange={(e) => setLoginPassword(e.target.value)}
+                    className="w-full p-2.5 my-2.5 border border-gray-300 rounded"
                     required
                 />
-                <button type="submit">Login</button>
+                <button type="submit" className="w-full py-2.5 bg-blue-600 text-white rounded cursor-pointer hover:bg-blue-700 mb-4">Login</button>
+                <button onClick={handleGoogleSignUp} className="w-full py-2.5 bg-blue-600 text-white rounded cursor-pointer hover:bg-blue-700">Sign In with Google</button>
             </form>
-            <button onClick={handleGoogleSignUp}>Sign In with Google</button>
+            
         </div>
     );
 }
