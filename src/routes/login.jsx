@@ -1,7 +1,8 @@
 // src/Login.jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+import { getAuth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+
 import { initializeApp } from 'firebase/app';
 import { doc, setDoc, getFirestore } from 'firebase/firestore';
 
@@ -61,6 +62,28 @@ function Login() {
         }
     };
 
+    const handleGoogleSignUp = async () => {
+
+        const provider = new GoogleAuthProvider();
+        try {
+            const result = await signInWithPopup(auth, provider);
+            console.log('User signed up:', result.user.uid);
+            result.user.uid && navigate('/dashboard');
+
+            localStorage.setItem('access_token', result.user.accessToken);
+            localStorage.setItem('uid', result.user.uid);
+
+            const accountRef = doc(db, 'accounts', result.user.uid);
+            await setDoc(accountRef, {
+                uid: result.user.uid,
+                email: result.user.email,
+                access_token: result.user.accessToken
+            })
+        } catch (error) {
+            console.error('Authentication error:', error.message);
+        }
+    };
+
     return (
         <div className="login-container">
             <form onSubmit={handleSubmit}>
@@ -84,6 +107,7 @@ function Login() {
                 />
                 <button type="submit">Login</button>
             </form>
+            <button onClick={handleGoogleSignUp}>Sign In with Google</button>
         </div>
     );
 }

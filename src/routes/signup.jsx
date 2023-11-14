@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAuth, GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword } from 'firebase/auth';
 import { initializeApp } from 'firebase/app';
+import { doc, setDoc, getFirestore } from 'firebase/firestore';
 
 // Get Firebase config settings from environment file
 const {
@@ -44,11 +45,24 @@ function SignUp() {
     };
 
     const handleGoogleSignUp = async () => {
+        const db = getFirestore(app);
 
         const provider = new GoogleAuthProvider();
         try {
             const result = await signInWithPopup(auth, provider);
             console.log('User signed up:', result.user.uid);
+            
+            localStorage.setItem('access_token', result.user.accessToken);
+            localStorage.setItem('uid', result.user.uid);
+
+            const accountRef = doc(db, 'accounts', result.user.uid);
+            await setDoc(accountRef, {
+                uid: result.user.uid,
+                email: result.user.email,
+                access_token: result.user.accessToken
+            })
+
+            result.user.uid && navigate('/dashboard');
         } catch (error) {
             console.error('Authentication error:', error.message);
         }
