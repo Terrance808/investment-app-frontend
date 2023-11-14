@@ -249,7 +249,7 @@ function Dashboard() {
         } catch (error) {
             console.log('Error during fetch:', error);
         }
-        setPurchaseModalActive(false);
+        setSellModalActive(false);
         setAccountBalance(newBalance);
     }
 
