@@ -1,12 +1,71 @@
+import { initializeApp } from 'firebase/app';
+import { doc, getDoc, getFirestore, setDoc, updateDoc } from 'firebase/firestore';
+
 import React, { useState, useEffect } from 'react';
 import TradingViewAdvancedChart from '../components/dashboard/tradingview-advanced-chart';
 
+// Get Firebase config settings from environment file
+const {
+    VITE_FIREBASE_API_KEY,
+    VITE_FIREBASE_AUTH_DOMAIN,
+    VITE_FIREBASE_PROJECT_ID,
+    VITE_FIREBASE_STORAGE_BUCKET,
+    VITE_FIREBASE_MESSAGING_SENDER_ID,
+    VITE_FIREBASE_APP_ID } = import.meta.env;
+
+// Firebase configuration object
+const firebaseConfig = {
+    apiKey: VITE_FIREBASE_API_KEY,
+    authDomain: VITE_FIREBASE_AUTH_DOMAIN,
+    projectId: VITE_FIREBASE_PROJECT_ID,
+    storageBucket: VITE_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: VITE_FIREBASE_MESSAGING_SENDER_ID,
+    appId: VITE_FIREBASE_APP_ID
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+
 function Dashboard() {
     const [stockTickerInput, setStockTickerInput] = useState('');
-    const [stockTicker, setStockTicker] = useState('');
-    const [stockPrice, setStockPrice] = useState(0);
+    const [stockTicker, setStockTicker] = useState('APPL');
+    const [stockPrice, setStockPrice] = useState(187);
 
-    
+    const [accountBalance, setAccountBalance] = useState(0);
+    const [accountPortfolio, setAccountPortfolio] = useState({});
+
+    const [depositModalActive, setDepositModalActive] = useState(false);
+    const [purchaseModalActive, setPurchaseModalActive] = useState(false);
+    const [sellModalActive, setSellModalActive] = useState(false);
+
+    const getAccount = async () => {
+        const uid = localStorage.getItem('uid');
+        const docRef = doc(db, 'accounts', uid);
+        const docSnap = await getDoc(docRef);
+        const account = docSnap.data();
+        if (account.balance) {
+            setAccountBalance(account.balance);
+        }
+
+        const portfolioRef = doc(db, 'portfolios', uid);
+        const portfolioSnap = await getDoc(portfolioRef);
+        const portfolio = portfolioSnap.data();
+        if (portfolio) {
+            setAccountPortfolio(portfolio);
+        }
+
+    }
+
+
+
+    useEffect(() => {
+        getAccount();
+    }, []);
+
+
+
     const handleStockInputChange = (event) => {
         setStockTickerInput(event.target.value);
     }
@@ -32,74 +91,316 @@ function Dashboard() {
         } catch (error) {
             console.log('Error during fetch:', error);
         }
-        
+
     }
 
-    
+
+
+    const openDepositModal = () => {
+        setDepositModalActive(true);
+        console.log("Deposit Modal Opened");
+    }
+
+    const depositCash = async (event) => {
+        event.preventDefault();
+
+        const depositAmount = event.target.depositAmount.value;
+        console.log(depositAmount);
+
+        const uid = localStorage.getItem('uid');
+
+        let newBalance;
+
+
+        try {
+            const accountRef = doc(db, 'accounts', uid);
+            const docSnap = await getDoc(accountRef);
+            if (docSnap.exists()) {
+                const account = docSnap.data();
+                const currentBalance = account.balance ? account.balance : 0;
+                newBalance = currentBalance + parseFloat(depositAmount);
+                await updateDoc(accountRef, {
+                    balance: newBalance
+                });
+            } else {
+                console.log("No such document!");
+            }
+
+        } catch (error) {
+            console.log('Error during fetch:', error);
+        }
+        setDepositModalActive(false);
+        setAccountBalance(newBalance);
+    }
+
+    const purchaseStock = async (event) => {
+        event.preventDefault();
+
+        const shareAmount = parseInt(event.target.shareCount.value);
+        const purchaseAmount = shareAmount * stockPrice;
+
+        const uid = localStorage.getItem('uid');
+
+        let newBalance;
+
+        try {
+            const accountRef = doc(db, 'accounts', uid);
+            const portfolioRef = doc(db, 'portfolios', uid);
+
+            const accountSnap = await getDoc(accountRef);
+            const portfolioSnap = await getDoc(portfolioRef);
+            let currentStockShares;
+            if (portfolioSnap.exists()) {
+                currentStockShares = portfolioSnap.data()[stockTicker] ? parseInt(portfolioSnap.data()[stockTicker]) : 0
+            }
+            console.log(typeof currentStockShares)
+
+            if (accountSnap.data().balance && (accountSnap.data().balance >= purchaseAmount)) {
+
+                const account = accountSnap.data();
+
+                const currentBalance = account.balance;
+                newBalance = currentBalance - purchaseAmount;
+
+
+
+                await updateDoc(accountRef, {
+                    balance: newBalance
+                });
+                if (currentStockShares) {
+                    const newShareAmount = currentStockShares + shareAmount;
+                    await updateDoc(portfolioRef, {
+                        [stockTicker]: newShareAmount
+                    })
+                } else {
+                    await setDoc(portfolioRef, {
+                        [stockTicker]: shareAmount
+                    })
+                }
+
+                const portfolio = accountPortfolio;
+                portfolio[stockTicker] = currentStockShares + shareAmount;
+
+                setAccountPortfolio(portfolio);
+                console.log(portfolio);
+
+
+            } else {
+                console.log("Not enough funds");
+            }
+
+        } catch (error) {
+            console.log('Error during fetch:', error);
+        }
+        setPurchaseModalActive(false);
+        setAccountBalance(newBalance);
+    }
+
+    const sellStock = async (event) => {
+        event.preventDefault();
+
+        const shareAmount = parseInt(event.target.sellShareCount.value);
+        const sellAmount = shareAmount * stockPrice;
+
+        const uid = localStorage.getItem('uid');
+
+        let newBalance;
+
+        try {
+            const accountRef = doc(db, 'accounts', uid);
+            const portfolioRef = doc(db, 'portfolios', uid);
+
+            const accountSnap = await getDoc(accountRef);
+            const portfolioSnap = await getDoc(portfolioRef);
+            let currentStockShares;
+            if (portfolioSnap.exists()) {
+                currentStockShares = portfolioSnap.data()[stockTicker] ? parseInt(portfolioSnap.data()[stockTicker]) : 0
+            }
+
+            if (portfolioSnap.data()[stockTicker] && (parseInt(portfolioSnap.data()[stockTicker]) >= shareAmount)) {
+
+                const account = accountSnap.data();
+
+                const currentBalance = parseInt(account.balance);
+                newBalance = currentBalance + sellAmount;
+
+
+
+                await updateDoc(accountRef, {
+                    balance: newBalance
+                });
+                if (portfolioSnap.exists()) {
+                    
+                    const newShareAmount = currentStockShares - shareAmount
+                    await updateDoc(portfolioRef, {
+                        [stockTicker]: newShareAmount
+                    })
+                    const portfolio = accountPortfolio;
+                    portfolio[stockTicker] = currentStockShares - shareAmount;
+                    setAccountPortfolio(portfolio);
+                } else {
+                    console.log("You do not own any of this stock");
+                }
+
+            } else {
+                console.log("Not enough funds");
+            }
+
+        } catch (error) {
+            console.log('Error during fetch:', error);
+        }
+        setPurchaseModalActive(false);
+        setAccountBalance(newBalance);
+    }
 
     return (
         <div>
-        <h1 className="text-3xl font-bold underline">Stock Dashboard</h1>
-        
             <div>
-                <h2>Portfolio</h2>
-                
-            </div>
+                <h1 className="text-3xl font-bold underline">Stock Dashboard</h1>
 
-            <div className="flex min-h-screen">
-                <div className="w-3/5">
-                    <TradingViewAdvancedChart />
-                </div>
-                
-                <div className="w-1/5 border-2">
-                    <div className="flex justify-center h-5/10 bg-sky-500">
-                        <div className="h-8">
-                            <h2 className="text-xl">Funds</h2>
-                        </div>
-                    
-                    </div>
-                    <div className="flex justify-center">
-                        <h3 className="text-lg">Portfolio</h3>
-                    </div>
+                <div>
+                    <h2>Portfolio</h2>
 
-                    <div className="flex justify-center">
-                        <button>Desposit</button>
-                    </div>
                 </div>
 
-                <div className="w-1/5 border-2">
-                    <form onSubmit={searchStock}>
-                        <input 
-                            type="text" 
-                            placeholder="Search Bar" 
-                            name="searchBar" 
-                            className="w-full p-2" 
-                            value={stockTickerInput}
-                            onChange={handleStockInputChange}
-                        />
-                        <button type="submit" className="w-full p-2 bg-blue-500 text-white">Search</button>
-                    </form>
-                    <div className="flex justify-center">
-                        
-                        {stockTicker && stockPrice && (
-                            <div>
-                                <h3 className="text-lg">Current Stock Price</h3>
-                                <p>{stockTicker} : {stockPrice}</p>
+                <div className="flex min-h-screen">
+                    <div className="w-3/5">
+                        <TradingViewAdvancedChart />
+                    </div>
+
+                    <div className="w-1/5 border-2">
+                        <div className="flex justify-center h-5/10 bg-sky-500">
+                            <div className="h-8">
+                                <h2 className="text-xl">Funds</h2>
                             </div>
-                        )}
-                        <div>
-                            
+
+                        </div>
+                        <div className="flex justify-center">
+                            <h3 className="text-lg">Portfolio</h3>
+                        </div>
+                        <div className="flex justify-center">
+                            <p>Balance: ${accountBalance}</p>
+                        </div>
+                        {accountPortfolio && Object.entries(accountPortfolio).map(([ticker, shares]) => (
+                            <div className="flex justify-center" key={ticker}>
+                                <p>{ticker}: {shares} shares</p>
+                            </div>
+                        ))}
+                        <div className="flex justify-center">
+                            <button onClick={openDepositModal}>Desposit</button>
                         </div>
                     </div>
 
+                    <div className="w-1/5 border-2">
+                        <form onSubmit={searchStock}>
+                            <input
+                                type="text"
+                                placeholder="Search Bar"
+                                name="searchBar"
+                                className="w-full p-2"
+                                value={stockTickerInput}
+                                onChange={handleStockInputChange}
+                            />
+                            <button type="submit" className="w-full p-2 bg-blue-500 text-white">Search</button>
+                        </form>
+                        <div className="flex justify-center">
+
+                            {stockTicker && stockPrice && (
+                                <div>
+                                    <div>
+                                        <h3 className="text-lg">Current Stock Price</h3>
+                                        <p>{stockTicker} : {stockPrice}</p>
+                                    </div>
+                                    <div>
+                                        <button
+                                            type="submit"
+                                            className="w-full p-2 bg-blue-500 text-white"
+                                            onClick={() => setPurchaseModalActive(true)}
+                                        >
+                                            Purchase Stock
+                                        </button>
+                                    </div>
+                                    <div>
+                                        <button
+                                            type="submit"
+                                            className="w-full p-2 bg-blue-500 text-white"
+                                            onClick={() => setSellModalActive(true)}
+                                        >
+                                            Sell Stock
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                            <div>
+
+                            </div>
+                        </div>
+
+
+                    </div>
 
                 </div>
 
+
+
+
             </div>
-        
-        
-        
-            
+            <div>
+                {depositModalActive && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 z-40 flex justify-center items-center">
+                        <div className="bg-white p-4 rounded-lg shadow-lg z-50">
+                            <div className="flex justify-between items-center mb-4">
+                                <h2>Deposit Cash</h2>
+                                <button onClick={() => setDepositModalActive(false)} >Close</button>
+                            </div>
+
+                            <form onSubmit={depositCash}>
+                                <label htmlFor="depositAmount">Deposit Amount: $</label>
+                                <input type="number" name="depositAmount" />
+                                <button type="submit">Submit</button>
+                            </form>
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            <div>
+                {purchaseModalActive && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 z-40 flex justify-center items-center">
+                        <div className="bg-white p-4 rounded-lg shadow-lg z-50">
+                            <div className="flex justify-between items-center mb-4">
+                                <h2>Purchase Stock</h2>
+                                <button onClick={() => setPurchaseModalActive(false)} >Close</button>
+                            </div>
+
+                            <form onSubmit={purchaseStock}>
+                                <label htmlFor="shareCount">Share Count: </label>
+                                <input type="number" name="shareCount" />
+                                <button type="submit">Buy</button>
+                            </form>
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            <div>
+                {sellModalActive && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 z-40 flex justify-center items-center">
+                        <div className="bg-white p-4 rounded-lg shadow-lg z-50">
+                            <div className="flex justify-between items-center mb-4">
+                                <h2>Sell Stock</h2>
+                                <button onClick={() => setSellModalActive(false)} >Close</button>
+                            </div>
+
+                            <form onSubmit={sellStock}>
+                                <label htmlFor="sellShareCount">Share Count: </label>
+                                <input type="number" name="sellShareCount" />
+                                <button type="submit">Sell</button>
+                            </form>
+                        </div>
+                    </div>
+                )}
+            </div>
         </div>
     );
 }
