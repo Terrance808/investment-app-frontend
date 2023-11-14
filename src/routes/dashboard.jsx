@@ -2,6 +2,7 @@ import { initializeApp } from 'firebase/app';
 import { doc, getDoc, getFirestore, setDoc, updateDoc } from 'firebase/firestore';
 
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import TradingViewAdvancedChart from '../components/dashboard/tradingview-advanced-chart';
 
 // Get Firebase config settings from environment file
@@ -39,6 +40,8 @@ function Dashboard() {
     const [depositModalActive, setDepositModalActive] = useState(false);
     const [purchaseModalActive, setPurchaseModalActive] = useState(false);
     const [sellModalActive, setSellModalActive] = useState(false);
+
+    const navigate = useNavigate();
 
     const getAccount = async () => {
         const uid = localStorage.getItem('uid');
@@ -253,10 +256,19 @@ function Dashboard() {
         setAccountBalance(newBalance);
     }
 
+    const logout = () => {
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('uid');
+        
+        navigate('/login');
+    };
+
     return (
         <div>
             <div>
                 <h1 className="text-3xl font-bold underline">Stock Dashboard</h1>
+
+                <button onClick={logout} className="p-2 bg-red-500 text-white rounded">Logout</button>
 
                 <div>
                     <h2>Portfolio</h2>
