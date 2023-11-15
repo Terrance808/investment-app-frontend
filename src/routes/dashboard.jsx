@@ -76,18 +76,18 @@ function Dashboard() {
         event.preventDefault();
 
         try {
-            const response = await fetch('http://localhost:8000/search_stock', {
+            const response = await fetch('http://localhost:8000/search_stock/', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ stock_ticker: stockTickerInput })
-            });
+            }).then(response => response.json()).then(data => { console.log(data)});
 
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
+            // if (!response.ok) {
+            //     throw new Error(`HTTP error! Status: ${response.status}`);
+            // }
 
-            const data = await response.json();
-            console.log(data);
+            // const data = await response.json();
+            // console.log(data);
             // setStockTicker(data.stock_ticker);
             // setStockPrice(data.stock_price);
 
