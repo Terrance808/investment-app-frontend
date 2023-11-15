@@ -76,7 +76,7 @@ function Dashboard() {
         event.preventDefault();
 
         try {
-            const response = await fetch('http://localhost:3000/search_stock', {
+            const response = await fetch('http://localhost:8000/search_stock', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ stock_ticker: stockTickerInput })
@@ -87,8 +87,9 @@ function Dashboard() {
             }
 
             const data = await response.json();
-            setStockTicker(data.stock_ticker);
-            setStockPrice(data.stock_price);
+            console.log(data);
+            // setStockTicker(data.stock_ticker);
+            // setStockPrice(data.stock_price);
 
 
         } catch (error) {
