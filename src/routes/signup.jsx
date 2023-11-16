@@ -35,6 +35,8 @@ function SignUp() {
 
     const navigate = useNavigate();
 
+    const db = getFirestore(app);
+
     const handleEmailSignUp = async (e) => {
         e.preventDefault();
 
@@ -46,6 +48,14 @@ function SignUp() {
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             console.log('User signed up:', userCredential.user.uid);
+
+            const accountRef = doc(db, 'accounts', userCredential.user.uid);
+            await setDoc(accountRef, {
+                uid: userCredential.user.uid,
+                email: userCredential.user.email,
+                access_token: userCredential.user.accessToken
+            });
+
             userCredential.user.uid && navigate('/login');
         } catch (error) {
             console.error('Authentication error:', error.message);
@@ -53,7 +63,6 @@ function SignUp() {
     };
 
     const handleGoogleSignUp = async () => {
-        const db = getFirestore(app);
 
         const provider = new GoogleAuthProvider();
         try {
@@ -68,7 +77,7 @@ function SignUp() {
                 uid: result.user.uid,
                 email: result.user.email,
                 access_token: result.user.accessToken
-            })
+            });
 
             result.user.uid && navigate('/dashboard');
         } catch (error) {

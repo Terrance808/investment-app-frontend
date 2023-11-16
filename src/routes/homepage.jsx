@@ -24,7 +24,7 @@ function Homepage() {
                     <Link to={"/login"}>
                         <button className="px-5 py-2.5 bg-blue-600 text-white rounded cursor-pointer transition-colors duration-200 hover:bg-blue-700">Login</button>
                     </Link>
-                    <Link to={"/login"}>
+                    <Link to={"/signup"}>
                         <button className="px-5 py-2.5 bg-blue-600 text-white rounded cursor-pointer transition-colors duration-200 hover:bg-blue-700">Sign Up</button>
                     </Link>
                 </div>

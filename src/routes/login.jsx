@@ -35,10 +35,11 @@ function Login() {
 
     const navigate = useNavigate();
 
+    const db = getFirestore(app);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        const db = getFirestore(app);
         try {
             const userCredential = await signInWithEmailAndPassword(auth, loginEmail, loginPassword);
             const user = userCredential.user;
@@ -49,12 +50,6 @@ function Login() {
             localStorage.setItem('uid', user.uid);
 
             const accountRef = doc(db, 'accounts', user.uid);
-            await setDoc(accountRef, {
-                uid: user.uid,
-                email: user.email,
-                access_token: user.accessToken
-            })
-
 
             user.uid && navigate('/dashboard');
         } catch (error) {
