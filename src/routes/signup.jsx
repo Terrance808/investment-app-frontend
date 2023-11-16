@@ -35,7 +35,7 @@ function SignUp() {
 
     const navigate = useNavigate();
 
-    const db = getFirestore(app);
+    const db = getFirestore();
 
     const handleEmailSignUp = async (e) => {
         e.preventDefault();
@@ -50,6 +50,7 @@ function SignUp() {
             console.log('User signed up:', userCredential.user.uid);
 
             const accountRef = doc(db, 'accounts', userCredential.user.uid);
+            console.log(userCredential.user);
             await setDoc(accountRef, {
                 uid: userCredential.user.uid,
                 email: userCredential.user.email,

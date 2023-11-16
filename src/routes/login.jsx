@@ -49,7 +49,7 @@ function Login() {
             localStorage.setItem('access_token', user.accessToken);
             localStorage.setItem('uid', user.uid);
 
-            const accountRef = doc(db, 'accounts', user.uid);
+            // const accountRef = doc(db, 'accounts', user.uid);
 
             user.uid && navigate('/dashboard');
         } catch (error) {
