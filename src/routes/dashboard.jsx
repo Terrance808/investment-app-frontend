@@ -266,100 +266,95 @@ function Dashboard() {
 
     return (
         <div>
-            <div>
-                <h1 className="text-3xl font-bold underline">Stock Dashboard</h1>
+            <div className="dashboardContainer p-5">
+                <header className="header text-center mb-5 bg-[#007bff] text-white py-2.5 rounded-md shadow-md">
+                    <h1 className="title text-4xl font-bold m-0">Stock Dashboard</h1>
+                </header>
 
                 <button onClick={logout} className="p-2 bg-red-500 text-white rounded">Logout</button>
 
-                <div>
-                    <h2>Portfolio</h2>
 
-                </div>
-
-                <div className="flex min-h-screen">
-                    <div className="w-3/5">
+                <main className="mainContent flex gap-5">
+                    {/* <section className="w-3/5"> */}
+                    <section className="chartSection flex-1 p-5 bg-[#333] rounded-lg shadow-md h-[90vh] overflow-y-auto">
                         <TradingViewAdvancedChart />
-                    </div>
+                    </section>
 
-                    <div className="w-1/5 border-2">
-                        <div className="flex justify-center h-5/10 bg-sky-500">
-                            <div className="h-8">
-                                <h2 className="text-xl">Funds</h2>
-                            </div>
+                    <aside className="sidebar flex-1 flex flex-col gap-5">
+                        <div className="p-4 border border-[#444] rounded-lg bg-[#333] shadow-md">
+                            <form onSubmit={searchStock}>
+                                <input
+                                    type="text"
+                                    placeholder="Search Bar"
+                                    name="searchBar"
+                                    className="w-full py-2.5 border border-[#555] rounded-md outline-none transition duration-300 ease-in-out bg-[#444] text-white focus:border-[#ff9800]"
+                                    value={stockTickerInput}
+                                    onChange={handleStockInputChange}
+                                />
+                                <button type="submit" className="w-full py-2.5 px-4 border-none rounded-md bg-[#ff9800] text-white cursor-pointer transition duration-300 ease-in-out hover:bg-[#ff7700]">Search</button>
+                            </form>
+                            <div className="flex justify-center">
 
-                        </div>
-                        <div className="flex justify-center">
-                            <h3 className="text-lg">Portfolio</h3>
-                        </div>
-                        <div className="flex justify-center">
-                            <p>Balance: ${accountBalance}</p>
-                        </div>
-                        {accountPortfolio && Object.entries(accountPortfolio).map(([ticker, shares]) => (
-                            <div className="flex justify-center" key={ticker}>
-                                <p>{ticker}: {shares} shares</p>
-                            </div>
-                        ))}
-                        <div className="flex justify-center">
-                            <button onClick={openDepositModal}>Desposit</button>
-                        </div>
-                    </div>
-
-                    <div className="w-1/5 border-2">
-                        <form onSubmit={searchStock}>
-                            <input
-                                type="text"
-                                placeholder="Search Bar"
-                                name="searchBar"
-                                className="w-full p-2"
-                                value={stockTickerInput}
-                                onChange={handleStockInputChange}
-                            />
-                            <button type="submit" className="w-full p-2 bg-blue-500 text-white">Search</button>
-                        </form>
-                        <div className="flex justify-center">
-
-                            {stockTicker && stockPrice && (
+                                { stockTicker && stockPrice && (
+                                    <div className="mt-5 bg-[#444] p-2.5 rounded-md">
+                                        <div >
+                                            <h3 className="text-lg">Current Stock Price</h3>
+                                            <p>{ stockTicker } : { stockPrice }</p>
+                                        </div>
+                                        <div>
+                                            <button
+                                                type="submit"
+                                                className="w-full p-2 bg-blue-500 text-white"
+                                                onClick={() => setPurchaseModalActive(true)}
+                                            >
+                                                Purchase Stock
+                                            </button>
+                                        </div>
+                                        <div>
+                                            <button
+                                                type="submit"
+                                                className="w-full p-2 bg-blue-500 text-white"
+                                                onClick={() => setSellModalActive(true)}
+                                            >
+                                                Sell Stock
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
                                 <div>
-                                    <div>
-                                        <h3 className="text-lg">Current Stock Price</h3>
-                                        <p>{stockTicker} : {stockPrice}</p>
-                                    </div>
-                                    <div>
-                                        <button
-                                            type="submit"
-                                            className="w-full p-2 bg-blue-500 text-white"
-                                            onClick={() => setPurchaseModalActive(true)}
-                                        >
-                                            Purchase Stock
-                                        </button>
-                                    </div>
-                                    <div>
-                                        <button
-                                            type="submit"
-                                            className="w-full p-2 bg-blue-500 text-white"
-                                            onClick={() => setSellModalActive(true)}
-                                        >
-                                            Sell Stock
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
-                            <div>
 
+                                </div>
                             </div>
                         </div>
 
+                        <div className="w-1/5 border-2">
+                            <div className="flex justify-center h-5/10 bg-sky-500">
+                                <div className="h-8">
+                                    <h2 className="text-xl">Funds</h2>
+                                </div>
 
-                    </div>
-
-                </div>
-
-
-
-
+                            </div>
+                            <div className="flex justify-center">
+                                <h3 className="text-lg">Portfolio</h3>
+                            </div>
+                            <div className="flex justify-center">
+                                <p>Balance: ${accountBalance}</p>
+                            </div>
+                            { accountPortfolio && Object.entries(accountPortfolio).map(([ticker, shares]) => (
+                                <div className="flex justify-center" key={ticker}>
+                                    <p>{ticker}: {shares} shares</p>
+                                </div>
+                            ))}
+                            <div className="flex justify-center">
+                                <button onClick={openDepositModal}>Desposit</button>
+                            </div>
+                        </div>
+                    </aside>
+                </main>
             </div>
+
             <div>
-                {depositModalActive && (
+                { depositModalActive && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 z-40 flex justify-center items-center">
                         <div className="bg-white p-4 rounded-lg shadow-lg z-50">
                             <div className="flex justify-between items-center mb-4">
@@ -378,7 +373,7 @@ function Dashboard() {
             </div>
 
             <div>
-                {purchaseModalActive && (
+                { purchaseModalActive && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 z-40 flex justify-center items-center">
                         <div className="bg-white p-4 rounded-lg shadow-lg z-50">
                             <div className="flex justify-between items-center mb-4">
@@ -397,7 +392,7 @@ function Dashboard() {
             </div>
 
             <div>
-                {sellModalActive && (
+                { sellModalActive && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 z-40 flex justify-center items-center">
                         <div className="bg-white p-4 rounded-lg shadow-lg z-50">
                             <div className="flex justify-between items-center mb-4">
