@@ -65,9 +65,68 @@ function Dashboard() {
 
     useEffect(() => {
         getAccount();
+        getEconomicData();
     }, []);
 
+    const getEconomicData = async () => {
+        try {
+            const tenYearTwoYearResponse = await fetch('https://api.stlouisfed.org/fred/series/observations?series_id=T10Y2Y&api_key=77a692bbcabfe758a81e1500815f0d78&file_type=json&sort_order=desc&limit=1', {
+                method: 'GET'
+            });
+            const tenYearTwoYear = await tenYearTwoYearResponse.json();
+            const tenYearTwoYearValue = tenYearTwoYear.observations[0].value;
+            console.log("Ten Year Value:", tenYearTwoYearValue);
 
+            const fedFundsResponse = await fetch('https://api.stlouisfed.org/fred/series/observations?series_id=FEDFUNDS&api_key=77a692bbcabfe758a81e1500815f0d78&file_type=json&sort_order=desc&limit=1', {
+                method: 'GET'
+            });
+            const fedFunds = await fedFundsResponse.json();
+            const fedFundsValue = fedFunds.observations[0].value;
+            console.log("Fed Funds Value:", fedFundsValue);
+           
+
+            const industrialProductionResponse = await fetch('https://api.stlouisfed.org/fred/series/observations?series_id=INDPRO&api_key=77a692bbcabfe758a81e1500815f0d78&file_type=json&sort_order=desc&limit=1', {
+                method: 'GET'
+            });
+            const industrialProduction = await industrialProductionResponse.json();
+            const industrialProductionValue = industrialProduction.observations[0].value;
+            console.log("Industrial Production Value:", industrialProductionValue);
+
+            const cpiResponse = await fetch('https://api.stlouisfed.org/fred/series/observations?series_id=CPIAUCSL&api_key=77a692bbcabfe758a81e1500815f0d78&file_type=json&sort_order=desc&limit=1', {
+                method: 'GET'
+            });
+            const cpi = await cpiResponse.json();
+            const cpiValue = cpi.observations[0].value;
+            console.log("CPI Value:", cpiValue);
+
+            const unemploymentResponse = await fetch('https://api.stlouisfed.org/fred/series/observations?series_id=UNRATE&api_key=77a692bbcabfe758a81e1500815f0d78&file_type=json&sort_order=desc&limit=1', {
+                method: 'GET'
+            });
+            const unemployement = await unemploymentResponse.json();
+            const unemploymentValue = unemployement.observations[0].value;
+            console.log("Unemployment Value:", unemploymentValue);
+
+            const gdpResponse = await fetch('https://api.stlouisfed.org/fred/series/observations?series_id=GDP&api_key=77a692bbcabfe758a81e1500815f0d78&file_type=json&sort_order=desc&limit=1', {
+                method: 'GET'
+            });
+            const gdp = await gdpResponse.json();
+            const gdpValue = gdp.observations[0].value;
+            console.log("GDP Value:", gdpValue);
+
+            const mTwoResponse = await fetch('https://api.stlouisfed.org/fred/series/observations?series_id=M2NS&api_key=77a692bbcabfe758a81e1500815f0d78&file_type=json&sort_order=desc&limit=1', {
+                method: 'GET'
+            });
+            const mTwo = await mTwoResponse.json();
+            const m2Value = mTwo.observations[0].value;
+            console.log("M2 Value:", m2Value);
+
+
+
+
+        } catch (error) {
+            console.log('Error during fetch:', error);
+        }
+    }
 
     const handleStockInputChange = (event) => {
         setStockTickerInput(event.target.value);
