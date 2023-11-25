@@ -41,6 +41,14 @@ function Dashboard() {
     const [purchaseModalActive, setPurchaseModalActive] = useState(false);
     const [sellModalActive, setSellModalActive] = useState(false);
 
+    const [cpi, setCpi] = useState(null);
+    const [fedFunds, setFedFunds] = useState(null);
+    const [gdp, setGdp] = useState(null);
+    const [industrialProduction, setIndustrialProduction] = useState(null);
+    const [m2, setM2] = useState(null);
+    const [tenYearTwoYear, setTenYearTwoYear] = useState(null);
+    const [unemployment, setUnemployment] = useState(null);
+
     const navigate = useNavigate();
 
     const getAccount = async () => {
@@ -75,14 +83,14 @@ function Dashboard() {
             });
             const tenYearTwoYear = await tenYearTwoYearResponse.json();
             const tenYearTwoYearValue = tenYearTwoYear.observations[0].value;
-            console.log("Ten Year Value:", tenYearTwoYearValue);
+            setTenYearTwoYear(tenYearTwoYearValue);
 
             const fedFundsResponse = await fetch('https://api.stlouisfed.org/fred/series/observations?series_id=FEDFUNDS&api_key=77a692bbcabfe758a81e1500815f0d78&file_type=json&sort_order=desc&limit=1', {
                 method: 'GET'
             });
             const fedFunds = await fedFundsResponse.json();
             const fedFundsValue = fedFunds.observations[0].value;
-            console.log("Fed Funds Value:", fedFundsValue);
+            setFedFunds(fedFundsValue);
            
 
             const industrialProductionResponse = await fetch('https://api.stlouisfed.org/fred/series/observations?series_id=INDPRO&api_key=77a692bbcabfe758a81e1500815f0d78&file_type=json&sort_order=desc&limit=1', {
@@ -90,35 +98,35 @@ function Dashboard() {
             });
             const industrialProduction = await industrialProductionResponse.json();
             const industrialProductionValue = industrialProduction.observations[0].value;
-            console.log("Industrial Production Value:", industrialProductionValue);
+            setIndustrialProduction(industrialProductionValue);
 
             const cpiResponse = await fetch('https://api.stlouisfed.org/fred/series/observations?series_id=CPIAUCSL&api_key=77a692bbcabfe758a81e1500815f0d78&file_type=json&sort_order=desc&limit=1', {
                 method: 'GET'
             });
             const cpi = await cpiResponse.json();
             const cpiValue = cpi.observations[0].value;
-            console.log("CPI Value:", cpiValue);
+            setCpi(cpiValue);
 
             const unemploymentResponse = await fetch('https://api.stlouisfed.org/fred/series/observations?series_id=UNRATE&api_key=77a692bbcabfe758a81e1500815f0d78&file_type=json&sort_order=desc&limit=1', {
                 method: 'GET'
             });
             const unemployement = await unemploymentResponse.json();
             const unemploymentValue = unemployement.observations[0].value;
-            console.log("Unemployment Value:", unemploymentValue);
+            setUnemployment(unemploymentValue);
 
             const gdpResponse = await fetch('https://api.stlouisfed.org/fred/series/observations?series_id=GDP&api_key=77a692bbcabfe758a81e1500815f0d78&file_type=json&sort_order=desc&limit=1', {
                 method: 'GET'
             });
             const gdp = await gdpResponse.json();
             const gdpValue = gdp.observations[0].value;
-            console.log("GDP Value:", gdpValue);
+            setGdp(gdpValue);
 
             const mTwoResponse = await fetch('https://api.stlouisfed.org/fred/series/observations?series_id=M2NS&api_key=77a692bbcabfe758a81e1500815f0d78&file_type=json&sort_order=desc&limit=1', {
                 method: 'GET'
             });
             const mTwo = await mTwoResponse.json();
             const m2Value = mTwo.observations[0].value;
-            console.log("M2 Value:", m2Value);
+            setM2(m2Value);
 
 
 
@@ -410,6 +418,19 @@ function Dashboard() {
                                 <button onClick={openDepositModal}>Desposit</button>
                             </div>
                         </div>
+                        { cpi && (
+                            <div>
+                                <h2 className="font-bold">Current Month's Economic Snapshot</h2>
+                                <p>{`Consumer Price Index: ${cpi}`}</p>
+                                <p>{`Fed Funds Rate: ${fedFunds}`}</p>
+                                <p>{`GDP: ${gdp}`}</p>
+                                <p>{`Industrial Production Index: ${industrialProduction}`}</p>
+                                <p>{`M2 Money Supply: ${m2}`}</p>
+                                <p>{`T10Y2Y: ${tenYearTwoYear}`}</p>
+                                <p>{`Unemployment Rate: ${unemployment}`}</p>
+                            </div>
+                        )}
+                        
                     </aside>
                 </main>
             </div>
