@@ -31,8 +31,8 @@ const db = getFirestore(app);
 
 function Dashboard() {
     const [stockTickerInput, setStockTickerInput] = useState('');
-    const [stockTicker, setStockTicker] = useState('APPL');
-    const [stockPrice, setStockPrice] = useState(187);
+    const [stockTicker, setStockTicker] = useState('');
+    const [stockPrice, setStockPrice] = useState(null);
 
     const [accountBalance, setAccountBalance] = useState(0);
     const [accountPortfolio, setAccountPortfolio] = useState({});
@@ -139,16 +139,18 @@ function Dashboard() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ stock_ticker: stockTickerInput })
-            }).then(response => response.json()).then(data => { console.log(data)});
+            });
 
-            // if (!response.ok) {
-            //     throw new Error(`HTTP error! Status: ${response.status}`);
-            // }
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
 
-            // const data = await response.json();
-            // console.log(data);
-            // setStockTicker(data.stock_ticker);
-            // setStockPrice(data.stock_price);
+            const data = await response.json();
+            const current_ticker = String(data.ticker).toUpperCase();
+            const current_price = Number(data.current_price).toFixed(2);
+            console.log(current_ticker);
+            setStockTicker(current_ticker);
+            setStockPrice(current_price);
 
 
         } catch (error) {
@@ -285,7 +287,7 @@ function Dashboard() {
                 const account = accountSnap.data();
 
                 const currentBalance = parseInt(account.balance);
-                newBalance = currentBalance + sellAmount;
+                newBalance = Number(currentBalance + sellAmount).toFixed(2);
 
 
 
